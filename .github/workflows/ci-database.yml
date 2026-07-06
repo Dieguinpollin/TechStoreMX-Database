@@ -1,1 +1,28 @@
+name: CI Database Deploy Test
 
+on:
+  push:
+    branches: [ "main" ] 
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql_test:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+          MYSQL_DATABASE: 'techstoremx'
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout de código
+        uses: actions/checkout@v3
+
+      - name: Probar integración del esquema SQL
+        run: |
+          mysql -h 127.0.0.1 -P 3306 -u root techstoremx < techstoremx_exportado.sql
+          echo "¡Migración e integración continua completada con éxito sin errores!"
